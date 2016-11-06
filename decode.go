@@ -5,12 +5,11 @@ import (
   "fmt"
   "io"
   "time"
-  "util"
 )
 
 /*
 对 Hessian 数据进行解码
-具体用法见: parse_test.go
+具体用法见: decode_test.go
 */
 const (
   PARSE_DEBUG = true
@@ -78,7 +77,7 @@ func (h *Hessian) read_type() string {
   if h.peek_byte() != 't' {
     return ""
   }
-  t_len, _ := util.UnpackInt16(h.peek(3)[1:3]) // 取类型字符串长度
+  t_len, _ := UnpackInt16(h.peek(3)[1:3]) // 取类型字符串长度
   t_name := h.next_rune(int(3 + t_len))[3:]    //取类型名称
   return string(t_name)
 }
@@ -111,27 +110,27 @@ func (h *Hessian) Parse() (v interface{}, err error) {
     v = false
 
   case 'I': //int
-    if v, err = util.UnpackInt32(h.next(4)); err != nil {
+    if v, err = UnpackInt32(h.next(4)); err != nil {
       panic(err)
       v = nil
       return
     }
 
   case 'L': //long
-    if v, err = util.UnpackInt64(h.next(8)); err != nil {
+    if v, err = UnpackInt64(h.next(8)); err != nil {
       v = nil
       return
     }
 
   case 'D': //double
-    if v, err = util.UnpackFloat64(h.next(8)); err != nil {
+    if v, err = UnpackFloat64(h.next(8)); err != nil {
       v = nil
       return
     }
 
   case 'd': //date
     var ms int64
-    if ms, err = util.UnpackInt64(h.next(8)); err != nil {
+    if ms, err = UnpackInt64(h.next(8)); err != nil {
       v = nil
       return
     }
@@ -141,7 +140,7 @@ func (h *Hessian) Parse() (v interface{}, err error) {
     var str_chunks []rune
     var len int16
     for { //避免递归读取 Chunks
-      if len, err = util.UnpackInt16(h.next(2)); err != nil {
+      if len, err = UnpackInt16(h.next(2)); err != nil {
         str_chunks = nil
         return
       }
@@ -160,7 +159,7 @@ func (h *Hessian) Parse() (v interface{}, err error) {
     var bin_chunks []byte //等同于 []uint8,在 反射判断类型的时候，会得到 []uint8
     var len int16
     for { //避免递归读取 Chunks
-      if len, err = util.UnpackInt16(h.next(2)); err != nil {
+      if len, err = UnpackInt16(h.next(2)); err != nil {
         bin_chunks = nil
         return
       }
@@ -217,7 +216,7 @@ func (h *Hessian) Parse() (v interface{}, err error) {
 
   case 'R': //ref
     var ref_idx int32
-    if ref_idx, err = util.UnpackInt32(h.next(4)); err != nil {
+    if ref_idx, err = UnpackInt32(h.next(4)); err != nil {
       return
     }
     if len(h.refs) > int(ref_idx) {

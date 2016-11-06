@@ -1,13 +1,11 @@
-package client
+package gohessian
 
 import (
   "bytes"
-  "gohessian"
   "log"
   "testing"
 )
 
-//GOPATH=/Users/weidewang/ownCloud/Workspace/go/gohessian go test -run=Test_*
 
 const (
   MATH_H_URL = "http://localhost:8080/HessianTest/math" //整数四则运算hessian测试接口
@@ -40,10 +38,10 @@ func Test_request_data_type(t *testing.T) {
   Request(DT_H_URL, "dataBoolean", false)
   Request(DT_H_URL, "dataDouble", 1989.0604)
 
-  list := []gohessian.Any{100, 10.001, "不厌其烦", []byte{0, 2, 4, 6, 8, 10}, true, nil, false}
+  list := []Any{100, 10.001, "不厌其烦", []byte{0, 2, 4, 6, 8, 10}, true, nil, false}
   Request(DT_H_URL, "dataList", list)
 
-  var hmap = make(map[gohessian.Any]gohessian.Any)
+  var hmap = make(map[Any]Any)
   hmap["你好"] = "哈哈哈"
   hmap[100] = "嘿嘿"
   hmap[100.1010] = 101910

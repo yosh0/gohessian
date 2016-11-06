@@ -1,13 +1,11 @@
-package client
+package gohessian
 
 import (
   "bytes"
-  "fmt"
-  "gohessian"
   "io"
-  "io/ioutil"
   "net/http"
-  "util"
+  "fmt"
+  "io/ioutil"
 )
 
 type hessian_request struct {
@@ -18,7 +16,7 @@ type hessian_request struct {
 //url string hessian 服务地址
 //method string hessian 公开的方法
 //params ...Any 请求参数
-func Request(url string, method string, params ...gohessian.Any) (interface{}, error) {
+func Request(url string, method string, params ...Any) (interface{}, error) {
   r := &hessian_request{}
   r.pack_head(method)
   for _, v := range params {
@@ -31,7 +29,7 @@ func Request(url string, method string, params ...gohessian.Any) (interface{}, e
     return nil, err
   }
   
-  h := gohessian.NewHessian(bytes.NewReader(resp))
+  h := NewHessian(bytes.NewReader(resp))
   v, err := h.Parse()
   
   if err != nil {
@@ -58,15 +56,15 @@ func http_post(url string, body io.Reader) (rb []byte, err error) {
 
 //封装  hessian 请求头
 func (h *hessian_request) pack_head(method string) {
-  tmp_b, _ := util.PackUint16(uint16(len(method)))
+  tmp_b, _ := PackUint16(uint16(len(method)))
   h.body = append(h.body, []byte{99, 0, 1, 109}...)
   h.body = append(h.body, tmp_b...)
   h.body = append(h.body, []byte(method)...)
 }
 
 //封装参数
-func (h *hessian_request) pack_param(p gohessian.Any) {
-  tmp_b, err := gohessian.Encode(p)
+func (h *hessian_request) pack_param(p Any) {
+  tmp_b, err := Encode(p)
   if err != nil {
     panic(err)
   }

@@ -6,7 +6,6 @@ import (
   "runtime"
   "time"
   "unicode/utf8"
-  "util"
 )
 
 /*
