@@ -2,6 +2,7 @@ package gohessian
 
 import (
 	"bytes"
+	"errors"
 	"log"
 	"runtime"
 	"time"
@@ -78,10 +79,10 @@ func Encode(v interface{}) (b []byte, err error) {
 		b, err = encode_map(v.(map[Any]Any))
 
 	default:
-		panic("unknow type")
+		return nil, errors.New("unknow type")
 	}
 	if ENCODER_DEBUG {
-		log.Println(util.SprintHex(b))
+		log.Println(SprintHex(b))
 	}
 	return
 }
@@ -99,7 +100,7 @@ func encode_binary(v []byte) (b []byte, err error) {
 	)
 
 	if len(v) == 0 {
-		if len_b, err = util.PackUint16(0); err != nil {
+		if len_b, err = PackUint16(0); err != nil {
 			b = nil
 			return
 		}
@@ -113,14 +114,14 @@ func encode_binary(v []byte) (b []byte, err error) {
 	for r_buf.Len() > 0 {
 		if r_buf.Len() > CHUNK_SIZE {
 			tag = 'b'
-			if len_b, err = util.PackUint16(uint16(CHUNK_SIZE)); err != nil {
+			if len_b, err = PackUint16(uint16(CHUNK_SIZE)); err != nil {
 				b = nil
 				return
 			}
 			len_n = CHUNK_SIZE
 		} else {
 			tag = 'B'
-			if len_b, err = util.PackUint16(uint16(r_buf.Len())); err != nil {
+			if len_b, err = PackUint16(uint16(r_buf.Len())); err != nil {
 				b = nil
 				return
 			}
@@ -147,7 +148,7 @@ func encode_bool(v bool) (b []byte, err error) {
 func encode_time(v time.Time) (b []byte, err error) {
 	var tmp_v []byte
 	b = append(b, 'd')
-	if tmp_v, err = util.PackInt64(v.UnixNano() / 1000000); err != nil {
+	if tmp_v, err = PackInt64(v.UnixNano() / 1000000); err != nil {
 		b = nil
 		return
 	}
@@ -158,7 +159,7 @@ func encode_time(v time.Time) (b []byte, err error) {
 // double
 func encode_float64(v float64) (b []byte, err error) {
 	var tmp_v []byte
-	if tmp_v, err = util.PackFloat64(v); err != nil {
+	if tmp_v, err = PackFloat64(v); err != nil {
 		b = nil
 		return
 	}
@@ -170,7 +171,7 @@ func encode_float64(v float64) (b []byte, err error) {
 // int
 func encode_int32(v int32) (b []byte, err error) {
 	var tmp_v []byte
-	if tmp_v, err = util.PackInt32(v); err != nil {
+	if tmp_v, err = PackInt32(v); err != nil {
 		b = nil
 		return
 	}
@@ -182,7 +183,7 @@ func encode_int32(v int32) (b []byte, err error) {
 // long
 func encode_int64(v int64) (b []byte, err error) {
 	var tmp_v []byte
-	if tmp_v, err = util.PackInt64(v); err != nil {
+	if tmp_v, err = PackInt64(v); err != nil {
 		b = nil
 		return
 	}
@@ -215,7 +216,7 @@ func encode_string(v string) (b []byte, err error) {
 	)
 
 	if v == "" {
-		if len_b, err = util.PackUint16(uint16(r_len)); err != nil {
+		if len_b, err = PackUint16(uint16(r_len)); err != nil {
 			b = nil
 			return
 		}
@@ -231,7 +232,7 @@ func encode_string(v string) (b []byte, err error) {
 			break
 		}
 		if r_len > CHUNK_SIZE {
-			if len_b, err = util.PackUint16(uint16(CHUNK_SIZE)); err != nil {
+			if len_b, err = PackUint16(uint16(CHUNK_SIZE)); err != nil {
 				b = nil
 				return
 			}
@@ -239,7 +240,7 @@ func encode_string(v string) (b []byte, err error) {
 			b = append(b, len_b...)
 			s_chunk(CHUNK_SIZE)
 		} else {
-			if len_b, err = util.PackUint16(uint16(r_len)); err != nil {
+			if len_b, err = PackUint16(uint16(r_len)); err != nil {
 				b = nil
 				return
 			}
@@ -261,7 +262,7 @@ func encode_list(v []Any) (b []byte, err error) {
 
 	b = append(b, 'V')
 
-	if len_b, err = util.PackInt32(int32(list_len)); err != nil {
+	if len_b, err = PackInt32(int32(list_len)); err != nil {
 		b = nil
 		return
 	}

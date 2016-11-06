@@ -111,9 +111,7 @@ func (h *Hessian) Parse() (v interface{}, err error) {
 
 	case 'I': //int
 		if v, err = UnpackInt32(h.next(4)); err != nil {
-			panic(err)
-			v = nil
-			return
+			return nil, err
 		}
 
 	case 'L': //long

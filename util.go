@@ -119,6 +119,7 @@ func SprintHex(b []byte) (rs string) {
 	return
 }
 
+// HostCheck make host conforms the HTTP request
 func HostCheck(host string) string {
 	exist := strings.Index(host, "http://")
 	if exist {

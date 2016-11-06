@@ -23,8 +23,6 @@ func NewClient(host, url string) (c Client) {
 	}
 }
 
-
-
 // Invoke send a request to hessian service and return the result of response
 // method string  => hessian service method
 // params ...Any  => request param
