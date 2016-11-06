@@ -118,3 +118,11 @@ func SprintHex(b []byte) (rs string) {
 	rs += fmt.Sprintf("}\n")
 	return
 }
+
+func HostCheck(host string) string {
+	exist := strings.Index(host, "http://")
+	if exist {
+		return host
+	}
+	return "http://" + host
+}

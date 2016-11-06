@@ -16,11 +16,14 @@ type hessian_request struct {
 // host string
 // url  string
 func NewClient(host, url string) (c Client) {
+	host = HostCheck(host)
 	return &Client{
 		Host: host,
 		URL:  url,
 	}
 }
+
+
 
 // Invoke send a request to hessian service and return the result of response
 // method string  => hessian service method
