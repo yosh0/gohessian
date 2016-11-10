@@ -14,7 +14,7 @@ func init() {
 	time.Now() //do nothing
 }
 
-var check_result = func(want, got []byte, t *testing.T) {
+var checkResult = func(want, got []byte, t *testing.T) {
 	if !bytes.Equal(want, got) {
 		t.Fatalf("want %v , got %v", want, got)
 	}
@@ -27,7 +27,7 @@ func Test_encode_binary(t *testing.T) {
 	}
 
 	want := []byte{0x42, 0x00, 0x00}
-	check_result(b, want, t)
+	checkResult(b, want, t)
 
 	raw := []byte{10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 'a', 'b', 'c', 'd'}
 	b, err = Encode(raw)
@@ -37,7 +37,7 @@ func Test_encode_binary(t *testing.T) {
 		t.Fail()
 	}
 
-	check_result(b, want, t)
+	checkResult(b, want, t)
 
 }
 
@@ -47,7 +47,7 @@ func Test_encode_boolean(t *testing.T) {
 		t.Fail()
 	}
 	want := []byte{0x54}
-	check_result(want, b, t)
+	checkResult(want, b, t)
 
 	b, err = Encode(false)
 	if err != nil || b[0] != 'F' {
@@ -55,7 +55,7 @@ func Test_encode_boolean(t *testing.T) {
 	}
 
 	want = []byte{0x46}
-	check_result(want, b, t)
+	checkResult(want, b, t)
 }
 
 func Test_encode_time(t *testing.T) {
@@ -65,7 +65,7 @@ func Test_encode_time(t *testing.T) {
 		t.Fail()
 	}
 	want := []byte{0x64, 0x00, 0x00, 0x01, 0x44, 0x15, 0x49, 0x34, 0x78}
-	check_result(want, b, t)
+	checkResult(want, b, t)
 }
 
 func Test_encode_double(t *testing.T) {
@@ -114,13 +114,13 @@ func Test_encode_list(t *testing.T) {
 }
 
 func Test_encode_map(t *testing.T) {
-	var hmap = make(map[Any]Any)
-	hmap["你好"] = "哈哈哈"
-	hmap[100] = "嘿嘿"
-	hmap[100.1010] = 101910
-	hmap[true] = true
-	hmap[false] = true
-	b, err := Encode(hmap)
+	var hMap = make(map[Any]Any)
+	hMap["你好"] = "哈哈哈"
+	hMap[100] = "嘿嘿"
+	hMap[100.1010] = 101910
+	hMap[true] = true
+	hMap[false] = true
+	b, err := Encode(hMap)
 	if err != nil || b == nil {
 		t.Fail()
 	}
