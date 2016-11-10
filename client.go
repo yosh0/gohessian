@@ -2,13 +2,14 @@ package gohessian
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
 )
 
-type hessian_request struct {
+type hessianRequest struct {
 	body []byte
 }
 
@@ -28,7 +29,7 @@ func NewClient(host, url string) (c *Client) {
 // params ...Any  => request param
 func (c *Client) Invoke(method string, params ...Any) (interface{}, error) {
 	reqURL := c.Host + c.URL
-	r := &hessian_request{}
+	r := &hessianRequest{}
 	r.packHead(method)
 	for _, v := range params {
 		r.packParam(v)
@@ -37,13 +38,20 @@ func (c *Client) Invoke(method string, params ...Any) (interface{}, error) {
 
 	resp, err := httpPost(reqURL, bytes.NewReader(r.body))
 	if err != nil {
+		fmt.Println("got hessian service response failed:", err)
 		return nil, err
+	}
+	fmt.Println("got hessian service response success")
+
+	if len(resp) == 0 {
+		return nil, errors.New("method or params error, resp is null")
 	}
 
 	h := NewHessian(bytes.NewReader(resp))
 	v, err := h.Parse()
 
 	if err != nil {
+		fmt.Println("hessian parse error", err)
 		return nil, err
 	}
 
@@ -66,7 +74,7 @@ func httpPost(url string, body io.Reader) (rb []byte, err error) {
 }
 
 // packHead pack hessian request head
-func (h *hessian_request) packHead(method string) {
+func (h *hessianRequest) packHead(method string) {
 	tmp_b, _ := PackUint16(uint16(len(method)))
 	h.body = append(h.body, []byte{99, 0, 1, 109}...)
 	h.body = append(h.body, tmp_b...)
@@ -74,7 +82,7 @@ func (h *hessian_request) packHead(method string) {
 }
 
 // packParam pack param in hessian request
-func (h *hessian_request) packParam(p Any) {
+func (h *hessianRequest) packParam(p Any) {
 	tmp_b, err := Encode(p)
 	if err != nil {
 		panic(err)
@@ -83,6 +91,6 @@ func (h *hessian_request) packParam(p Any) {
 }
 
 // packEnd pack end of hessian request
-func (h *hessian_request) packEnd() {
+func (h *hessianRequest) packEnd() {
 	h.body = append(h.body, 'z')
 }
