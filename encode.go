@@ -138,9 +138,8 @@ func encode_binary(v []byte) (b []byte, err error) {
 func encode_bool(v bool) (b []byte, err error) {
 	if v == true {
 		b = append(b, 'T')
-	} else {
-		b = append(b, 'F')
 	}
+	b = append(b, 'F')
 	return
 }
 

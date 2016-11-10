@@ -15,7 +15,7 @@ type hessian_request struct {
 // NewClient return a client of hessian
 // host string
 // url  string
-func NewClient(host, url string) (c Client) {
+func NewClient(host, url string) (c *Client) {
 	host = HostCheck(host)
 	return &Client{
 		Host: host,
