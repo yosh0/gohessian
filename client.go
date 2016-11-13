@@ -24,6 +24,11 @@ func NewClient(host, url string) (c *Client) {
 	}
 }
 
+// String format hessian client request location
+func (c Client) String() string {
+	return c.Host + c.URL
+}
+
 // Invoke send a request to hessian service and return the result of response
 // method string  => hessian service method
 // params ...Any  => request param
