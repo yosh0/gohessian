@@ -3,6 +3,7 @@ package gohessian
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"log"
 	"reflect"
 	"runtime"
@@ -81,6 +82,9 @@ func Encode(v interface{}) (b []byte, err error) {
 	case map[Any]Any:
 		b, err = encodeMap(v.(map[Any]Any))
 
+	case Any:
+		b, err = encodeObject(v.(Any))
+
 	default:
 		return nil, errors.New("unknow type")
 	}
@@ -141,6 +145,7 @@ func encodeBinary(v []byte) (b []byte, err error) {
 func encodeBool(v bool) (b []byte, err error) {
 	if v == true {
 		b = append(b, 'T')
+		return
 	}
 	b = append(b, 'F')
 	return
@@ -308,20 +313,34 @@ func encodeMap(v map[Any]Any) (b []byte, err error) {
 // object
 func encodeObject(v Any) (b []byte, err error) {
 	valueV := reflect.ValueOf(v)
-	objectType := valueV.FieldByName(ObjectType)
-	if !objectType.IsValid() || objectType.Type() != "string" {
+	typeV := reflect.TypeOf(v)
+	fmt.Println("v => ", v)
+
+	jiji, exist := typeV.FieldByName(ObjectType)
+	fmt.Println(jiji)
+	fmt.Println(exist)
+	if !exist {
 		b = nil
-		return b, errors.New("Object Type not Set or Type is not String")
+		err = errors.New("Object Type not Set")
+		return b, err
+	}
+	objectTypeField := valueV.FieldByName(ObjectType)
+	fmt.Println("type of Type Field =>", objectTypeField.Type().String())
+	fmt.Println("value of Type Field =>", objectTypeField.String())
+	if objectTypeField.Type().String() != "string" {
+		b = nil
+		err = errors.New("type of Type Field is not String")
+		return b, err
 	}
 	// Object Type
-	b = append(b, 'O')
-	b = append(b, []byte(objectType.String())...)
+	b = append(b, 'C')
+	b = append(b, []byte(objectTypeField.String())...)
 
 	// Object Field Length
-	typeV := reflect.TypeOf(v)
-	if lenField, err := PackInt16(0x90 + uint16(typeV.NumField())); err != nil {
+	if lenField, err := PackInt16(0x90 + int16(typeV.NumField())); err != nil {
 		b = nil
-		return b, errors.New("can not count field length")
+		err = errors.New("can not count field length, error: " + err.Error())
+		return b, err
 	} else {
 		b = append(b, lenField...)
 	}
@@ -333,23 +352,27 @@ func encodeObject(v Any) (b []byte, err error) {
 		}
 		if name, err := Encode(typeV.Field(i).Name); err != nil {
 			b = nil
-			return b, errors.New("encode field name failed")
+			err = errors.New("encode field name failed, error: " + err.Error())
+			return b, err
 		} else {
 			b = append(b, name...)
 		}
 	}
 
+	b = append(b, 'O')
 	// Object Value
-	for i := 0; i < typeV.NumField(); i++  {
+	for i := 0; i < typeV.NumField(); i++ {
 		if typeV.Field(i).Name == ObjectType {
 			continue
 		}
-	if name, err := Encode(valueV.Field(i).Type()); err != nil {
-		b = nil
-		return b, errors.New("encode field name failed")
-	} else {
-		b = append(b, name...)
-	}
+		typeV.Field(i).Type.String()
+		if name, err := Encode(valueV.Field(i)); err != nil { // TODO Encode 无法识别对应类型
+			b = nil
+			err = errors.New("encode field name failed, error: " + err.Error())
+			return b, err
+		} else {
+			b = append(b, name...)
+		}
 	}
 
 	return b, nil

@@ -126,3 +126,21 @@ func Test_encode_map(t *testing.T) {
 	}
 
 }
+
+func Test_encode_object(t *testing.T) {
+	var Car struct {
+		Color  string
+		Model  string
+		Length int32
+		Type   string
+	}
+	Car.Color = "red"
+	Car.Model = "corvette"
+	Car.Length = 13
+	Car.Type = "example.Car"
+
+	b, err := Encode(Car)
+	if err != nil || b == nil {
+		t.Fatal(err)
+	}
+}
