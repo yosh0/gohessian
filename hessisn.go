@@ -4,6 +4,10 @@ import (
 	"bufio"
 )
 
+const (
+	ObjectType = "Type"
+)
+
 // interface{} 的别名
 type Any interface{}
 

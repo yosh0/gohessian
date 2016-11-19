@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"log"
+	"reflect"
 	"runtime"
 	"time"
 	"unicode/utf8"
@@ -306,6 +307,50 @@ func encodeMap(v map[Any]Any) (b []byte, err error) {
 
 // object
 func encodeObject(v Any) (b []byte, err error) {
-	b = append(b, 'o')
+	valueV := reflect.ValueOf(v)
+	objectType := valueV.FieldByName(ObjectType)
+	if !objectType.IsValid() || objectType.Type() != "string" {
+		b = nil
+		return b, errors.New("Object Type not Set or Type is not String")
+	}
+	// Object Type
+	b = append(b, 'O')
+	b = append(b, []byte(objectType.String())...)
+
+	// Object Field Length
+	typeV := reflect.TypeOf(v)
+	if lenField, err := PackInt16(0x90 + uint16(typeV.NumField())); err != nil {
+		b = nil
+		return b, errors.New("can not count field length")
+	} else {
+		b = append(b, lenField...)
+	}
+
+	// Every Field Name
+	for i := 0; i < typeV.NumField(); i++ {
+		if typeV.Field(i).Name == ObjectType {
+			continue
+		}
+		if name, err := Encode(typeV.Field(i).Name); err != nil {
+			b = nil
+			return b, errors.New("encode field name failed")
+		} else {
+			b = append(b, name...)
+		}
+	}
+
+	// Object Value
+	for i := 0; i < typeV.NumField(); i++  {
+		if typeV.Field(i).Name == ObjectType {
+			continue
+		}
+	if name, err := Encode(valueV.Field(i).Type()); err != nil {
+		b = nil
+		return b, errors.New("encode field name failed")
+	} else {
+		b = append(b, name...)
+	}
+	}
+
 	return b, nil
 }
