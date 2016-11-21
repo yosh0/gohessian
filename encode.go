@@ -377,3 +377,20 @@ func encodeObject(v Any) (b []byte, err error) {
 
 	return b, nil
 }
+
+func encodeByType(v interface{}, t string) ([]byte, error) {
+	switch t {
+	case "string":
+		return Encode(v.(string))
+	case "int":
+		return Encode(v.(int))
+	case "int32":
+		return Encode(v.(int32))
+	case "int64":
+		return Encode(v.(int64))
+	case "bool":
+		return Encode(v.(bool))
+		//case
+
+	}
+}
