@@ -366,7 +366,7 @@ func encodeObject(v Any) (b []byte, err error) {
 			continue
 		}
 		typeV.Field(i).Type.String()
-		if name, err := Encode(valueV.Field(i)); err != nil { // TODO Encode 无法识别对应类型
+		if name, err := encodeByType(valueV.Field(i), typeV.Field(i).Type.Name()); err != nil { // TODO Encode 无法识别复杂类型
 			b = nil
 			err = errors.New("encode field name failed, error: " + err.Error())
 			return b, err
@@ -390,7 +390,15 @@ func encodeByType(v interface{}, t string) ([]byte, error) {
 		return Encode(v.(int64))
 	case "bool":
 		return Encode(v.(bool))
-		//case
-
+	case "[]byte":
+		return Encode(v.([]byte))
+	case "time.Time":
+		return Encode(v.(time.Time))
+	case "float64":
+		return Encode(v.(float64))
+	case "nil":
+		return Encode(v)
+	default:
+		return nil, errors.New("unsupport type in object...")
 	}
 }
