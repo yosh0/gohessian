@@ -332,7 +332,8 @@ func encodeObject(v Any) (b []byte, err error) {
 	}
 	// Object Type
 	b = append(b, 'C')
-	b = append(b, len(objectTypeField.String()), []byte(objectTypeField.String())...)
+	b = append(b, byte(len(objectTypeField.String())))
+	b = append(b, []byte(objectTypeField.String())...)
 
 	// Object Field Length
 	if lenField, err := PackInt16(0x90 + int16(typeV.NumField()) - 1); err != nil { // -1 是为了排除 Type Field
