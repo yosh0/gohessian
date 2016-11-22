@@ -378,26 +378,24 @@ func encodeObject(v Any) (b []byte, err error) {
 	return b, nil
 }
 
-func encodeByType(v interface{}, t string) ([]byte, error) {
+func encodeByType(v reflect.Value, t string) ([]byte, error) {
 	switch t {
 	case "string":
-		return Encode(v.(string))
+		return Encode(v.String())
 	case "int":
-		return Encode(v.(int))
+		return Encode(int(v.Int()))
 	case "int32":
-		return Encode(v.(int32))
+		return Encode(int32(v.Int()))
 	case "int64":
-		return Encode(v.(int64))
+		return Encode(v.Int())
 	case "bool":
-		return Encode(v.(bool))
+		return Encode(v.Bool())
 	case "[]byte":
-		return Encode(v.([]byte))
-	case "time.Time":
-		return Encode(v.(time.Time))
+		return Encode(v.Bytes())
 	case "float64":
-		return Encode(v.(float64))
+		return Encode(v.Float())
 	case "nil":
-		return Encode(v)
+		return Encode(nil)
 	default:
 		return nil, errors.New("unsupport type in object...")
 	}
