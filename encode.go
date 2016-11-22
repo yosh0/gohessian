@@ -332,7 +332,7 @@ func encodeObject(v Any) (_ []byte, err error) {
 	}
 	// Object Type
 	b.WriteByte('C')
-	b.Write(byte(len(objectTypeField.String())))
+	b.WriteByte(byte(len(objectTypeField.String())))
 	b.WriteString(objectTypeField.String())
 
 	// Object Field Length
@@ -352,7 +352,7 @@ func encodeObject(v Any) (_ []byte, err error) {
 		b.WriteString(typeV.Field(i).Name)
 	}
 
-	b.Write('O')
+	b.WriteByte('O')
 	// Object Value
 	for i := 0; i < typeV.NumField(); i++ {
 		if typeV.Field(i).Name == ObjectType {
