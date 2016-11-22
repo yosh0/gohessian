@@ -311,37 +311,37 @@ func encodeMap(v map[Any]Any) (b []byte, err error) {
 }
 
 // object
-func encodeObject(v Any) (b []byte, err error) {
+func encodeObject(v Any) (_ []byte, err error) {
 	valueV := reflect.ValueOf(v)
 	typeV := reflect.TypeOf(v)
 	fmt.Println("v => ", v)
 
-	jiji, exist := typeV.FieldByName(ObjectType)
-	fmt.Println(jiji)
-	fmt.Println(exist)
+	var b bytes.Buffer
+
+	_, exist := typeV.FieldByName(ObjectType)
 	if !exist {
-		b = nil
+		b.Reset()
 		err = errors.New("Object Type not Set")
-		return b, err
+		return b.Bytes(), err
 	}
 	objectTypeField := valueV.FieldByName(ObjectType)
 	if objectTypeField.Type().String() != "string" {
-		b = nil
+		b.Reset()
 		err = errors.New("type of Type Field is not String")
-		return b, err
+		return b.Bytes(), err
 	}
 	// Object Type
-	b = append(b, 'C')
-	b = append(b, byte(len(objectTypeField.String())))
-	b = append(b, []byte(objectTypeField.String())...)
+	b.WriteByte('C')
+	b.Write(byte(len(objectTypeField.String())))
+	b.WriteString(objectTypeField.String())
 
 	// Object Field Length
 	if lenField, err := PackInt16(0x90 + int16(typeV.NumField()) - 1); err != nil { // -1 是为了排除 Type Field
-		b = nil
+		b.Reset()
 		err = errors.New("can not count field length, error: " + err.Error())
-		return b, err
+		return b.Bytes(), err
 	} else {
-		b = append(b, lenField...)
+		b.Write(lenField)
 	}
 
 	// Every Field Name
@@ -349,32 +349,25 @@ func encodeObject(v Any) (b []byte, err error) {
 		if typeV.Field(i).Name == ObjectType {
 			continue
 		}
-		if name, err := Encode(typeV.Field(i).Name); err != nil {
-			b = nil
-			err = errors.New("encode field name failed, error: " + err.Error())
-			return b, err
-		} else {
-			b = append(b, name...)
-		}
+		b.WriteString(typeV.Field(i).Name)
 	}
 
-	b = append(b, 'O')
+	b.Write('O')
 	// Object Value
 	for i := 0; i < typeV.NumField(); i++ {
 		if typeV.Field(i).Name == ObjectType {
 			continue
 		}
-		typeV.Field(i).Type.String()
 		if name, err := encodeByType(valueV.Field(i), typeV.Field(i).Type.Name()); err != nil { // TODO Encode 无法识别复杂类型
-			b = nil
+			b.Reset()
 			err = errors.New("encode field name failed, error: " + err.Error())
-			return b, err
+			return b.Bytes(), err
 		} else {
-			b = append(b, name...)
+			b.Write(name)
 		}
 	}
 
-	return b, nil
+	return b.Bytes(), nil
 }
 
 func encodeByType(v reflect.Value, t string) ([]byte, error) {
