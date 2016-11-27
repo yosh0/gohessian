@@ -332,8 +332,9 @@ func encodeObject(v Any) (_ []byte, err error) {
 	}
 	// Object Type
 	b.WriteByte('C')
-	b.WriteByte(byte(len(objectTypeField.String())))
-	b.Write(objectTypeField.Bytes())
+	lenObjectTypeField := len(objectTypeField.String())
+	b.WriteByte(byte(lenObjectTypeField))
+	b.Write([]byte(objectTypeField.String())[:lenObjectTypeField-1])
 
 	// Object Field Length
 	if lenField, err := PackInt16(0x90 + int16(typeV.NumField()) - 1); err != nil { // -1 是为了排除 Type Field

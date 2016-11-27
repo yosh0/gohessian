@@ -136,7 +136,6 @@ func Test_encode_object(t *testing.T) {
 	}
 	Car.Color = "red"
 	Car.Model = "corvette"
-	Car.Length = 13
 	Car.Type = "example.Car"
 
 	b, err := Encode(Car)
