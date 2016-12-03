@@ -361,14 +361,13 @@ func encodeObject(v Any) (_ []byte, err error) {
 			continue
 		}
 		b.WriteByte(byte(len(valueV.Field(i).String())))
-		b.WriteString(valueV.Field(i).String())
-		// if name, err := encodeByType(valueV.Field(i), typeV.Field(i).Type.Name()); err != nil { // TODO Encode 无法识别复杂类型
-		// 	b.Reset()
-		// 	err = errors.New("encode field name failed, error: " + err.Error())
-		// 	return b.Bytes(), err
-		// } else {
-		// 	b.Write(name)
-		// }
+		if value, err := encodeByType(valueV.Field(i), typeV.Field(i).Type.Name()); err != nil { // TODO Encode 无法识别复杂类型
+			b.Reset()
+			err = errors.New("encode field value failed, error: " + err.Error())
+			return b.Bytes(), err
+		} else {
+			b.Write(value)
+		}
 	}
 
 	return b.Bytes(), nil
@@ -377,9 +376,10 @@ func encodeObject(v Any) (_ []byte, err error) {
 func encodeByType(v reflect.Value, t string) ([]byte, error) {
 	switch t {
 	case "string":
+		// return []byte(v.String()), nil
 		return Encode(v.String())
 	case "int":
-		return Encode(int(v.Int()))
+		return Encode(v.Int())
 	case "int32":
 		return Encode(int32(v.Int()))
 	case "int64":
