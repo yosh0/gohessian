@@ -17,7 +17,7 @@ type hessianRequest struct {
 // host string
 // url  string
 func NewClient(host, url string) (c *Client) {
-//	host = HostCheck(host)
+//	host = HostCheck(host) // https
 	return &Client{
 		Host: host,
 		URL:  url,
